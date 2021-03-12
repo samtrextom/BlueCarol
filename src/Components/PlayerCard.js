@@ -15,20 +15,27 @@ export default function PlayerCard({player, toggle}) {
   if(player.activeProf==="firstaid"){firstAidDis=true}
 
   return (
-    <Card style={{ width: "100%", height: 70, margin: 5 }}>
+    <Card style={{ width: "100%",height:75, margin: 5 }}>
       <div style={{display:'flex'}}>
         <Avatar/>
         <div style={{display:'block'}} >
-          <h5 style={{margin:0}}>Name</h5>
-          <div style={{ margin: 0, fontSize:12 }}>{player.race.name} {player.class}</div>
+          <h5 style={{margin:0}}>{player.name}</h5>
+          <div style={{display:'flex'}}>
+            <div style={{ margin: 0, fontSize:12 }}>{player.race.name} {player.class}</div>
+            <div style={{fontSize:10,marginLeft:10}}>
+              {player.professions.map((prof)=>{
+                return <div>{prof.name}: {prof.skill}</div>
+              })}
+            </div>
+          </div>
         </div>
       </div>
       {player.professions.map((prof) => {
         var dis = false;
-        if (player.activeProf === prof) {
+        if (player.activeProf === prof.name) {
           dis = true;
         }
-        return getProfIcon(prof, dis, toggle, player.id);
+        return getProfIcon(prof.name, dis, toggle, player.id);
       })}
       {getProfIcon("fishing",fishDis, toggle, player.id)}
       {getProfIcon("woodcutting",woodDis, toggle, player.id)}

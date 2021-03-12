@@ -5,6 +5,7 @@ import ResourceBar from './Components/ResourceBar'
 import { createPlayer } from './data/createPlayer'
 import PlayerCard from './Components/PlayerCard'
 import {SuccessButton, ErrorButton} from './Components/ActionColorButtons'
+import {descriptions} from './data/resourceDescriptions'
 
 function App() {
 
@@ -16,19 +17,23 @@ function App() {
       name:'Human',
       description:'',
       upkeep:0,
-      adventure:0,
       mining:0,
       herbalism:0,
       skinning:0,
       tailoring:0,
-      blacksmithing:0,
-      jewelcrafting:0,
+      armorsmithing:0,
+      weaponsmithing:0,
+      mailcrafting:0,
       leatherworking:0,
       engineering:0,
-      alchemy:0
+      alchemy:0,
+      cooking:0,
+      firstaid:0,
+      woodcutting:0,
+      fishing:0
   },
     class:"Warrior",
-    professions:["herbalism","alchemy"],
+    professions:[{name:"herbalism",skill:0},{name:"alchemy",skill:0}],
     activeProf:null
   }])
 
@@ -46,7 +51,7 @@ function App() {
   const [oreMax, setOreMax] = useState(100)         //MAX
   const [leather, setLeather] = useState(0)
   const [leatherMax, setLeatherMax] = useState(100) //MAX
-  const [fish, setFish] = useState(0)
+  const [fish, setFish] = useState(100)
   const [fishMax, setFishMax] = useState(100)       //MAX
   const [cloth, setCloth] = useState(0)
   const [clothMax, setClothMax] = useState(100)     //MAX
@@ -54,7 +59,7 @@ function App() {
   const [woodMax, setWoodMax] = useState(100)       //MAX
 
   /**Produced Materials */
-  const [bakedFish, setBakedFish] = useState(100)
+  const [bakedFish, setBakedFish] = useState(0)
   const [bakedFishReq, setBakedFishReq] = useState(false)
   const [house, setHouse] = useState(0)
   const [houseReq, setHouseReq] = useState(false)
@@ -123,7 +128,6 @@ function App() {
     var index = guild.findIndex(p=>p.id===id)
     guild.splice(index,1,tempPlayer)
     setGuild([...guild])
-    guild.forEach((p)=>{console.log(p.activeProf)})
   }
 
   const checkGameState= async ()=>{
@@ -143,19 +147,44 @@ function App() {
 
       guild.map((p)=>{
         if(p.activeProf){
-          counts[p.activeProf]++
+          counts[p.activeProf] = 1 + p.race[p.activeProf]
+          var luck
+          var tempPlayer
+          var index
+          if(p.activeProf===p.professions[0].name && p.professions[0].skill < 300 ){
+              luck = Math.floor(Math.random() * 20)
+              if(luck===19){
+                p.professions[0].skill++
+                tempPlayer = {...p}
+                index = guild.findIndex(pl=>pl.id===p.id)
+                guild.splice(index,1,tempPlayer)
+                setGuild([...guild])
+              }
+          }
+          else if(p.activeProf===p.professions[1].name && p.professions[1].skill < 300){
+              luck = Math.floor(Math.random() * 20)
+              if(luck===19){
+                p.professions[1].skill++
+                tempPlayer = {...p}
+                index = guild.findIndex(pl=>pl.id===p.id)
+                guild.splice(index,1,tempPlayer)
+                setGuild([...guild])
+              }
+          }
         }
       })
 
       var initCooking = counts.cooking
       for(var c = 0; c < initCooking; c++){
-        if(fish + counts.fishing >= 1 && wood + counts.woodcutting >= .5){
+        if(fish + counts.fishing >= 1 && wood + counts.woodcutting >= .1){
           counts.fishing--
-          counts.woodcutting = counts.woodcutting-.5
+          counts.woodcutting = counts.woodcutting-.1
         }else{
           counts.cooking--
         }
       }
+
+      console.log(counts.cooking)
 
       var initHouse = counts.house
       for(var h = 0; h < initHouse; h++){
@@ -253,17 +282,23 @@ function App() {
         }
       }
 
-      if(foodUpkeep/20 > bakedFish){
+      if(foodUpkeep/2 > bakedFish*2 + fish){
         do{
           setFoodUpKeep(foodUpkeep-guild[guild.length-1].race.upkeep)
           guild.pop()
           if(guild.length===0){
             setLostGame(true)
           }
-        }while(foodUpkeep/2 > bakedFish)
+        }while(foodUpkeep/2 > bakedFish*2 + fish)
       }
       
-      counts.cooking = counts.cooking - foodUpkeep/20
+      if((counts.cooking + bakedFish)*2 < foodUpkeep/2)
+      {
+        counts.fishing = counts.fishing - foodUpkeep/2
+      }else{
+        counts.cooking = counts.cooking - foodUpkeep/4
+      }
+
 
       if(herbs+counts.herbalism >= herbsMax){
         setHerbs(herbsMax)
@@ -300,7 +335,7 @@ function App() {
       }else{
         setCloth(cloth+counts.cloth)
       }
-
+      console.log(counts.cooking)
       setBakedFish(bakedFish+counts.cooking)
       setHouse(house+counts.house)
       setBarn(barn+counts.barn)
@@ -315,17 +350,17 @@ function App() {
     }
   }
 
-  const checkBakedFishReq=()=>{if(fish>=1&&wood>=.5){setBakedFishReq(true)}else{setBakedFishReq(false)}}    //checking baked fish status
-  const checkHouseReq    =()=>{if(wood>=houseWood){setHouseReq(true)}else{setHouseReq(false)}}              //checking house status
-  const checkBarnReq     =()=>{if(wood>=barnWood){setBarnReq(true)}else{setBarnReq(false)}}                 //checking barn status
-  const checkPotionsReq  =()=>{if(herbs>=10){setPotionsReq(true)}else{setPotionsReq(false)}}                //checking potions status
-  const checkPlateReq    =()=>{if(ore>=10&&wood>=.5){setPlateReq(true)}else{setPlateReq(false)}}            //checking plate armor status
-  const checkMailReq     =()=>{if(ore>=5&&leather>=5&&wood>=.5){setMailReq(true)}else{setMailReq(false)}}   //checking mail armor status
-  const checkLeatherReq  =()=>{if(leather>=10){setLeatherReq(true)}else{setLeatherReq(false)}}              //checking leather armor status
-  const checkClothReq    =()=>{if(cloth>=10){setClothReq(true)}else{setClothReq(false)}}                    //checking cloth armor status
-  const checkBandageReq  =()=>{if(cloth>=2){setBandageReq(true)}else{setBandageReq(false)}}                 //checking bandage status
-  const checkBombReq     =()=>{if(ore>=8&&cloth>=2){setBombReq(true)}else{setBombReq(false)}}               //checking bomb status
-  const checkSwordReq    =()=>{if(ore>=10&&wood>=.5){setSwordReq(true)}else{setSwordReq(false)}}            //checking sword status
+  const checkBakedFishReq=()=>{if(fish>=1&&wood>=.5){setBakedFishReq(true)}else{setBakedFishReq(false)}}       //checking baked fish status
+  const checkHouseReq    =()=>{if(wood>=houseWood && guildCap<40){setHouseReq(true)}else{setHouseReq(false)}}  //checking house status
+  const checkBarnReq     =()=>{if(wood>=barnWood){setBarnReq(true)}else{setBarnReq(false)}}                    //checking barn status
+  const checkPotionsReq  =()=>{if(herbs>=10){setPotionsReq(true)}else{setPotionsReq(false)}}                   //checking potions status
+  const checkPlateReq    =()=>{if(ore>=10&&wood>=.5){setPlateReq(true)}else{setPlateReq(false)}}               //checking plate armor status
+  const checkMailReq     =()=>{if(ore>=5&&leather>=5&&wood>=.5){setMailReq(true)}else{setMailReq(false)}}      //checking mail armor status
+  const checkLeatherReq  =()=>{if(leather>=10){setLeatherReq(true)}else{setLeatherReq(false)}}                 //checking leather armor status
+  const checkClothReq    =()=>{if(cloth>=10){setClothReq(true)}else{setClothReq(false)}}                       //checking cloth armor status
+  const checkBandageReq  =()=>{if(cloth>=2){setBandageReq(true)}else{setBandageReq(false)}}                    //checking bandage status
+  const checkBombReq     =()=>{if(ore>=8&&cloth>=2){setBombReq(true)}else{setBombReq(false)}}                  //checking bomb status
+  const checkSwordReq    =()=>{if(ore>=10&&wood>=.5){setSwordReq(true)}else{setSwordReq(false)}}               //checking sword status
   const checkRecruitReq  =()=>{if(guildCap>guild.length){setRecruitReq(true)}else{setRecruitReq(false)}}
 
   const togglePause = () =>{
@@ -347,26 +382,26 @@ function App() {
 })
 
   return ( !lostGame ?
-    <div style={{display:'grid', gridTemplateColumns:'9% 9% 9% 9% 9% 9% 9% 9% 9% 9%', gridTemplateRows:'10% 10% 10% 10% 10% 10% 10% 10% 10% 10%', gap:'.5% .5%'}}>
+    <div style={{display:'grid', gridTemplateColumns:'9% 9% 9% 9% 9% 9% 9% 9% 9% 9%', gridTemplateRows:'10% 10% 10% 10% 10% 10% 10% 10% 10% 10%', gap:'.5% .5%', backgroundColor:"#e3e3e3"}}>
       <div style={{gridColumnStart:1, gridColumnEnd:3, gridRowStart:1, gridRowEnd:12}}>
         <List dense>
-            <ListItem><ResourceBar name='Herbs'         total={herbs} max={herbsMax}/><Button size="small" variant="contained" color="primary" onClick={handleHerb}>Farm</Button></ListItem>
-            <ListItem><ResourceBar name='Ore'           total={ore} max={oreMax}/><Button size="small" variant="contained" color="primary" onClick={handleOre}>Farm</Button></ListItem>
-            <ListItem><ResourceBar name='Leather'       total={leather} max={leatherMax}/><Button size="small" variant="contained" color="primary" onClick={handleLeather}>Farm</Button></ListItem>
-            <ListItem><ResourceBar name='Fish'          total={fish} max={fishMax}/><Button size="small" variant="contained" color="primary" onClick={handleFish}>Farm</Button></ListItem>
-            <ListItem><ResourceBar name='Wood'          total={wood} max={woodMax}/><Button size="small" variant="contained" color="primary" onClick={handleWood}>Farm</Button></ListItem>
-            <ListItem><ResourceBar name='Cloth'         total={cloth} max={clothMax}/><Button size="small" variant="contained" color="primary" onClick={handleCloth}>Farm</Button></ListItem>
-            <ListItem><ResourceBar name='Baked Fish'    total={String(bakedFish).substring(0,5)}/><Button size="small" variant="contained" color="primary" disabled={!bakedFishReq} onClick={handleBakedFish}>Craft</Button></ListItem>
-            <ListItem><ResourceBar name='Houses'        total={house}/><Button size="small" variant="contained" color="primary" disabled={!houseReq} onClick={handleHouse}>Craft</Button>{houseWood}</ListItem>
-            <ListItem><ResourceBar name='Barns'         total={barn}/><Button size="small" variant="contained" color="primary" disabled={!barnReq} onClick={handleBarn}>Craft</Button>{barnWood}</ListItem>
-            <ListItem><ResourceBar name='Potions'       total={potions}/><Button size="small" variant="contained" color="primary" disabled={!potionsReq} onClick={handlePotions}>Craft</Button></ListItem>
-            <ListItem><ResourceBar name='Plate Armor'   total={plateArmor}/><Button size="small" variant="contained" color="primary" disabled={!plateReq} onClick={handlePlateArmor}>Craft</Button></ListItem>
-            <ListItem><ResourceBar name='MailArmor'     total={mailArmor}/><Button size="small" variant="contained" color="primary" disabled={!mailReq} onClick={handleMailArmor}>Craft</Button></ListItem>
-            <ListItem><ResourceBar name='Leather Armor' total={leatherArmor}/><Button size="small" variant="contained" color="primary" disabled={!leatherReq} onClick={handleLeatherArmor}>Craft</Button></ListItem>
-            <ListItem><ResourceBar name='Cloth Armor'   total={clothArmor}/><Button size="small" variant="contained" color="primary" disabled={!clothReq} onClick={handleClothArmor}>Craft</Button></ListItem>
-            <ListItem><ResourceBar name='Swords'        total={sword}/><Button size="small" variant="contained" color="primary" disabled={!swordReq} onClick={handleSword}>Craft</Button></ListItem>
-            <ListItem><ResourceBar name='Bombs'         total={bomb}/><Button size="small" variant="contained" color="primary" disabled={!bombReq} onClick={handleBomb}>Craft</Button></ListItem>
-            <ListItem><ResourceBar name='Bandage'       total={bandage}/><Button size="small" variant="contained" color="primary" disabled={!bandageReq} onClick={handleBandage}>Craft</Button></ListItem>
+            <ListItem><ResourceBar name='Herbs' description={descriptions.herb} total={herbs} max={herbsMax}/><Button size="small" variant="contained" color="primary" onClick={handleHerb}>Farm</Button>{counts.herbalism}</ListItem>
+            <ListItem><ResourceBar name='Ore' description={descriptions.ore} total={ore} max={oreMax}/><Button size="small" variant="contained" color="primary" onClick={handleOre}>Farm</Button>{counts.mining}</ListItem>
+            <ListItem><ResourceBar name='Leather' description={descriptions.leather} total={leather} max={leatherMax}/><Button size="small" variant="contained" color="primary" onClick={handleLeather}>Farm</Button>{counts.skinning}</ListItem>
+            <ListItem><ResourceBar name='Fish' description={descriptions.fish} total={fish} max={fishMax}/><Button size="small" variant="contained" color="primary" onClick={handleFish}>Farm</Button>{counts.fishing}</ListItem>
+            <ListItem><ResourceBar name='Wood' description={descriptions.wood} total={String(wood).substring(0,5)} max={woodMax}/><Button size="small" variant="contained" color="primary" onClick={handleWood}>Farm</Button>{counts.woodcutting}</ListItem>
+            <ListItem><ResourceBar name='Cloth' description={descriptions.cloth} total={cloth} max={clothMax}/><Button size="small" variant="contained" color="primary" onClick={handleCloth}>Farm</Button>{counts.cloth}</ListItem>
+            <ListItem><ResourceBar name='Baked Fish' description={descriptions.bakedFish} total={String(bakedFish).substring(0,5)}/><Button size="small" variant="contained" color="primary" disabled={!bakedFishReq} onClick={handleBakedFish}>Craft</Button>{counts.cooking}</ListItem>
+            <ListItem><ResourceBar name='Houses' description={descriptions.house} total={house}/><Button size="small" variant="contained" color="primary" disabled={!houseReq} onClick={handleHouse}>Craft</Button>{houseWood}</ListItem>
+            <ListItem><ResourceBar name='Barns' description={descriptions.barn} total={barn}/><Button size="small" variant="contained" color="primary" disabled={!barnReq} onClick={handleBarn}>Craft</Button>{barnWood}</ListItem>
+            <ListItem><ResourceBar name='Potions' description={descriptions.potion} total={potions}/><Button size="small" variant="contained" color="primary" disabled={!potionsReq} onClick={handlePotions}>Craft</Button>{counts.alchemy}</ListItem>
+            <ListItem><ResourceBar name='Plate Armor' description={descriptions.plateArmor} total={plateArmor}/><Button size="small" variant="contained" color="primary" disabled={!plateReq} onClick={handlePlateArmor}>Craft</Button>{counts.armorsmithing}</ListItem>
+            <ListItem><ResourceBar name='MailArmor' description={descriptions.mailArmor} total={mailArmor}/><Button size="small" variant="contained" color="primary" disabled={!mailReq} onClick={handleMailArmor}>Craft</Button>{counts.mailcrafting}</ListItem>
+            <ListItem><ResourceBar name='Leather Armor' description={descriptions.leatherArmor} total={leatherArmor}/><Button size="small" variant="contained" color="primary" disabled={!leatherReq} onClick={handleLeatherArmor}>Craft</Button>{counts.leatherworking}</ListItem>
+            <ListItem><ResourceBar name='Cloth Armor' description={descriptions.clothArmor} total={clothArmor}/><Button size="small" variant="contained" color="primary" disabled={!clothReq} onClick={handleClothArmor}>Craft</Button>{counts.tailoring}</ListItem>
+            <ListItem><ResourceBar name='Swords' description={descriptions.sword} total={sword}/><Button size="small" variant="contained" color="primary" disabled={!swordReq} onClick={handleSword}>Craft</Button>{counts.weaponsmithing}</ListItem>
+            <ListItem><ResourceBar name='Bombs' description={descriptions.bomb} total={bomb}/><Button size="small" variant="contained" color="primary" disabled={!bombReq} onClick={handleBomb}>Craft</Button>{counts.engineering}</ListItem>
+            <ListItem><ResourceBar name='Bandage' description={descriptions.bandage} total={bandage}/><Button size="small" variant="contained" color="primary" disabled={!bandageReq} onClick={handleBandage}>Craft</Button>{counts.firstaid}</ListItem>
           </List>
       </div>
       <div>

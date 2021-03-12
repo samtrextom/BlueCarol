@@ -1,6 +1,7 @@
 import React from 'react'
+import {Tooltip} from '@material-ui/core'
 
-export default function ResourceBar({name,total, max}) {
+export default function ResourceBar({description,name,total, max}) {
 
     const styles={
         bar:{
@@ -18,10 +19,10 @@ export default function ResourceBar({name,total, max}) {
     }
 
     return (
-        <div style={styles.bar}>
-            {max?<div>{name}: {total} / {max}<div style={styles.filler}></div></div>:<div>{name}: {total}</div>}
-
-        </div>
-        
+        <Tooltip title={description}>
+            <div style={styles.bar}>
+                {max?<div>{name}: {total} / {max}<div style={styles.filler}></div></div>:<div>{name}: {total}</div>}
+            </div>
+        </Tooltip>
     )
 }
