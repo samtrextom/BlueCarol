@@ -79,24 +79,44 @@ function App() {
   const [leatherArmor, setLeatherArmor] = useState(0)
   const [leatherReq, setLeatherReq] = useState(false)
 
-  const handleHerb    =()=>{if(herbs>=herbsMax){setHerbs(herbsMax)}else{setHerbs(herbs+1)}}
-  const handleOre     =()=>{if(ore>=oreMax){setOre(oreMax)}else{setOre(ore+1)}}
-  const handleLeather =()=>{if(leather>=leatherMax){setLeather(leatherMax)}else{setLeather(leather+1)}}
-  const handleFish    =()=>{if(fish>=fishMax){setFish(fishMax)}else{setFish(fish+1)}}
-  const handleWood    =()=>{if(wood>=woodMax){setWood(woodMax)}else{setWood(wood+1)}}
-  const handleCloth   =()=>{if(cloth>=clothMax){setCloth(clothMax)}else{setCloth(cloth+1)}}
+  var counts={
+    herbalism:0,
+    mining:0,
+    fishing:0,
+    skinning:0,
+    woodcutting:0,
+    cloth:0,
+    cooking:0,
+    house:0,
+    barn:0,
+    alchemy:0,
+    armorsmithing:0,
+    mailcrafting:0,
+    leatherworking:0,
+    tailoring:0,
+    engineering:0,
+    firstaid:0,
+    weaponsmithing:0
+  }
 
-  const handleBakedFish   =()=>{setBakedFish(bakedFish+1);setFish(fish-1);setWood(wood-.5);}
-  const handleHouse       =()=>{setHouse(house+1);setWood(wood-houseWood);setHouseWood(houseWood*1.50);setGuildCap(guildCap+1);}
-  const handleBarn        =()=>{setBarn(barn+1);setWood(wood-barnWood);setBarnWood(barnWood*1.50);setHerbsMax(herbsMax+50);setOreMax(oreMax+50);setLeatherMax(leatherMax+50);setWoodMax(woodMax+50);setClothMax(clothMax+50);setFishMax(fishMax+50);}
-  const handlePotions     =()=>{setPotions(potions+1);setHerbs(herbs-10);}
-  const handlePlateArmor  =()=>{setPlateArmor(plateArmor+1);setOre(ore-10);setWood(wood-.5);}
-  const handleMailArmor   =()=>{setMailArmor(mailArmor+1);setOre(ore-5);setWood(wood-.5);setLeather(leather-5);}
-  const handleLeatherArmor=()=>{setLeatherArmor(leatherArmor+1);setLeather(leather-10);}
-  const handleClothArmor  =()=>{setClothArmor(clothArmor+1);setCloth(cloth-10);}
-  const handleBomb        =()=>{setBomb(bomb+1);setCloth(cloth-2);setOre(ore-8);}
-  const handleBandage     =()=>{setBandge(bandage+1);setCloth(cloth-2);}
-  const handleSword       =()=>{setSword(sword+1);setOre(ore-10);setWood(wood-.5);}
+  const handleHerb    =()=>{counts.herbalism++}
+  const handleOre     =()=>{counts.mining++}
+  const handleLeather =()=>{counts.skinning++}
+  const handleFish    =()=>{counts.fishing++}
+  const handleWood    =()=>{counts.woodcutting++}
+  const handleCloth   =()=>{counts.cloth++}
+
+  const handleBakedFish   =()=>{counts.cooking++}
+  const handleHouse       =()=>{counts.house++}
+  const handleBarn        =()=>{counts.barn++}
+  const handlePotions     =()=>{counts.alchemy++}
+  const handlePlateArmor  =()=>{counts.armorsmithing++}
+  const handleMailArmor   =()=>{counts.mailcrafting++}
+  const handleLeatherArmor=()=>{counts.leatherworking++}
+  const handleClothArmor  =()=>{counts.tailoring++}
+  const handleBomb        =()=>{counts.engineering++}
+  const handleBandage     =()=>{counts.firstaid++}
+  const handleSword       =()=>{counts.weaponsmithing++}
 
   const toggleActiveProf=(input,id)=>{
     var tempPlayer = {...guild.find(p=>p.id===id),activeProf:input}
@@ -107,7 +127,6 @@ function App() {
   }
 
   const checkGameState= async ()=>{
-    console.log(new Date())
     if(!lostGame && !paused){
       await checkBakedFishReq(); 
       await checkHouseReq(); 
@@ -121,8 +140,178 @@ function App() {
       await checkBandageReq();
       await checkBombReq();
       await checkRecruitReq();
-      autoHerb();autoMine();autoSkin();autoFish();autoWood();autoCook();autoAlch();autoArmor();autoMail();autoLW();autoTailor();autoFirstAid();autoEngi();autoSword();
-      upKeep()
+
+      guild.map((p)=>{
+        if(p.activeProf){
+          counts[p.activeProf]++
+        }
+      })
+
+      var initCooking = counts.cooking
+      for(var c = 0; c < initCooking; c++){
+        if(fish + counts.fishing >= 1 && wood + counts.woodcutting >= .5){
+          counts.fishing--
+          counts.woodcutting = counts.woodcutting-.5
+        }else{
+          counts.cooking--
+        }
+      }
+
+      var initHouse = counts.house
+      for(var h = 0; h < initHouse; h++){
+        counts.woodcutting=counts.woodcutting-houseWood
+        setHouseWood(Math.ceil(houseWood*1.75))
+        setGuildCap(guildCap+1)
+      }
+
+      var initBarn = counts.barn
+      for(var b = 0; b < initBarn; b++){
+        counts.woodcutting=counts.woodcutting-barnWood
+        setBarnWood(Math.ceil(barnWood*1.50))
+        setOreMax(oreMax+50)
+        setHerbsMax(herbsMax+50)
+        setClothMax(clothMax+50)
+        setFishMax(fishMax+50)
+        setLeatherMax(leatherMax+50)
+        setWoodMax(woodMax+200)
+      }
+
+      var initAlchemy = counts.alchemy
+      for(var a = 0; a < initAlchemy; a++){
+        if(potions + counts.herbalism >= 10){
+          counts.herbalism = counts.herbalism - 10
+        }else{
+          counts.alchemy--
+        }
+      }
+
+      var initArmor = counts.armorsmithing
+      for(var a1 = 0; a1 < initArmor; a1++){
+        if(ore + counts.mining >= 10 && wood + counts.woodcutting >= .5){
+          counts.mining = counts.mining - 10
+          counts.woodcutting = counts.woodcutting - .5
+        }else{
+          counts.armorsmithing--
+        }
+      }
+
+      var initMail = counts.mailcrafting
+      for(var m = 0; m < initMail; m++){
+        if(ore + counts.mining >= 5 && leather + counts.skinning >= 5 && wood + counts.woodcutting >= .5){
+          counts.mining = counts.mining - 5
+          counts.skinning = counts.skinning - 5
+          counts.woodcutting = counts.woodcutting - .5
+        }else{
+          counts.mailcrafting--
+        }
+      }
+
+      var initLeather = counts.leatherworking
+      for(var lw = 0; lw < initLeather; lw++){
+        if(leather + counts.skinning >= 10){
+          counts.skinning = counts.skinning - 10
+        }else{
+          counts.leatherworking--
+        }
+      }
+
+      var initCloth = counts.tailoring
+      for(var t = 0; t < initCloth; t++){
+        if(cloth + counts.cloth >= 10){
+          counts.cloth = counts.cloth - 10
+        }else{
+          counts.tailoring--
+        }
+      }
+
+      var initBand = counts.firstaid
+      for(var f = 0; f < initBand; f++){
+        if(cloth + counts.cloth >= 2){
+          counts.cloth = counts.cloth -2
+        }else{
+          counts.firstaid--
+        }
+      }
+
+      var initBomb = counts.engineering
+      for(var e = 0; e < initBomb; e++){
+        if(ore + counts.mining >= 8 && cloth + counts.cloth >= 2 ){
+          counts.mining = counts.mining - 8
+          counts.cloth = counts.cloth - 2
+        }else{
+          counts.engineering--
+        }
+      }
+
+      var initSword = counts.weaponsmithing
+      for(var ws = 0; ws < initSword; ws++){
+        if(ore + counts.mining >= 10 && wood + counts.woodcutting >= .5){
+          counts.mining = counts.mining - 10
+          counts.woodcutting = counts.woodcutting - .5
+        }else{
+          counts.weaponsmithing--
+        }
+      }
+
+      if(foodUpkeep/20 > bakedFish){
+        do{
+          setFoodUpKeep(foodUpkeep-guild[guild.length-1].race.upkeep)
+          guild.pop()
+          if(guild.length===0){
+            setLostGame(true)
+          }
+        }while(foodUpkeep/2 > bakedFish)
+      }
+      
+      counts.cooking = counts.cooking - foodUpkeep/20
+
+      if(herbs+counts.herbalism >= herbsMax){
+        setHerbs(herbsMax)
+      }else{
+        setHerbs(herbs+counts.herbalism)
+      }
+
+      if(ore+counts.mining >= oreMax){
+        setOre(oreMax)
+      }else{
+        setOre(ore+counts.mining)
+      }
+
+      if(leather+counts.skinning >= leatherMax){
+        setLeather(leatherMax)
+      }else{
+        setLeather(leather+counts.skinning)
+      }
+
+      if(fish+counts.fishing >= fishMax){
+        setFish(fishMax)
+      }else{
+        setFish(fish+counts.fishing)
+      }
+
+      if(wood+counts.woodcutting >= woodMax){
+        setWood(woodMax)
+      }else{
+        setWood(wood+counts.woodcutting)
+      }
+
+      if(cloth+counts.cloth >= clothMax){
+        setCloth(clothMax)
+      }else{
+        setCloth(cloth+counts.cloth)
+      }
+
+      setBakedFish(bakedFish+counts.cooking)
+      setHouse(house+counts.house)
+      setBarn(barn+counts.barn)
+      setPotions(potions+counts.alchemy)
+      setPlateArmor(plateArmor+counts.armorsmithing)
+      setMailArmor(mailArmor+counts.mailcrafting)
+      setLeatherArmor(leatherArmor+counts.leatherworking)
+      setClothArmor(clothArmor+counts.tailoring)
+      setBandge(bandage+counts.firstaid)
+      setBomb(bomb+counts.engineering)
+      setSword(sword+counts.weaponsmithing)
     }
   }
 
@@ -138,37 +327,6 @@ function App() {
   const checkBombReq     =()=>{if(ore>=8&&cloth>=2){setBombReq(true)}else{setBombReq(false)}}               //checking bomb status
   const checkSwordReq    =()=>{if(ore>=10&&wood>=.5){setSwordReq(true)}else{setSwordReq(false)}}            //checking sword status
   const checkRecruitReq  =()=>{if(guildCap>guild.length){setRecruitReq(true)}else{setRecruitReq(false)}}
-  
-  const autoHerb    =()=>{guild.map((player)=>{if(player.activeProf==="herbalism"){handleHerb()}return null})}
-  const autoMine    =()=>{guild.map((player)=>{if(player.activeProf==="mining"){handleOre()}return null})}
-  const autoSkin    =()=>{guild.map((player)=>{if(player.activeProf==="skinning"){handleLeather()}return null})}
-  const autoFish    =()=>{guild.map((player)=>{if(player.activeProf==="fishing"){handleFish()}return null})}
-  const autoWood    =()=>{guild.map((player)=>{if(player.activeProf==="woodcutting"){handleWood()}return null})}
-  const autoCook    =()=>{guild.map((player)=>{if(player.activeProf==="cooking"){if(bakedFishReq){handleBakedFish()}}return null})}
-  const autoAlch    =()=>{guild.map((player)=>{if(player.activeProf==="alchemy"){if(potionsReq){handlePotions()}}return null})}
-  const autoArmor   =()=>{guild.map((player)=>{if(player.activeProf==="armorsmithing"){if(plateReq){handlePlateArmor()}}return null})}
-  const autoMail    =()=>{guild.map((player)=>{if(player.activeProf==="mailcrafting"){if(mailReq){handleMailArmor()}}return null})}
-  const autoLW      =()=>{guild.map((player)=>{if(player.activeProf==="leatherworking"){if(leatherReq){handleLeatherArmor()}}return null})}
-  const autoTailor  =()=>{guild.map((player)=>{if(player.activeProf==="tailoring"){if(clothReq){handleClothArmor()}}return null})}
-  const autoFirstAid=()=>{guild.map((player)=>{if(player.activeProf==="firstaid"){if(bandageReq){handleBandage()}}return null})}
-  const autoEngi    =()=>{guild.map((player)=>{if(player.activeProf==="engineering"){if(bombReq){handleBomb()}}return null})}
-  const autoSword   =()=>{guild.map((player)=>{if(player.activeProf==="swordsmithing"){if(swordReq){handleSword()}}return null})}
-
-  const upKeep =()=>{
-
-    if(foodUpkeep/20 > bakedFish){
-      do{
-        setFoodUpKeep(foodUpkeep-guild[guild.length-1].race.upkeep)
-        guild.pop()
-        if(guild.length===0){
-          setLostGame(true)
-        }
-      }while(foodUpkeep/2 > bakedFish)
-    }
-
-    setBakedFish((bakedFish-(foodUpkeep/20)))
-
-  }
 
   const togglePause = () =>{
     setPaused(!paused)

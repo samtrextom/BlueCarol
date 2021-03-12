@@ -1,3 +1,3 @@
 export const profs =[
-  "alchemy", "herbalism", "mining", "armorsmithing", "weaponsmithing", "engineering", "skinning", "leatherworking", "mailcrafting", "tailoring"
+  "skinning", "herbalism", "mining", "armorsmithing", "weaponsmithing", "engineering", "alchemy", "leatherworking", "mailcrafting", "tailoring"
 ]

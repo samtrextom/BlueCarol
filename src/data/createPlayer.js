@@ -5,7 +5,7 @@ import {classes} from './classes'
 export const createPlayer=(id)=>{
   var race = races[Math.floor(Math.random() * races.length)]
 
-  var prof1 = profs[Math.floor(Math.random() * profs.length)]
+  var prof1 = profs[Math.floor(Math.random() * 3)]
 
   var prof2 
 
