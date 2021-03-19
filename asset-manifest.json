@@ -1,0 +1,22 @@
+{
+  "files": {
+    "main.css": "/BlueCarol/static/css/main.7d180cbf.chunk.css",
+    "main.js": "/BlueCarol/static/js/main.48592bd9.chunk.js",
+    "main.js.map": "/BlueCarol/static/js/main.48592bd9.chunk.js.map",
+    "runtime-main.js": "/BlueCarol/static/js/runtime-main.19495ad8.js",
+    "runtime-main.js.map": "/BlueCarol/static/js/runtime-main.19495ad8.js.map",
+    "static/js/2.06ccb3c0.chunk.js": "/BlueCarol/static/js/2.06ccb3c0.chunk.js",
+    "static/js/2.06ccb3c0.chunk.js.map": "/BlueCarol/static/js/2.06ccb3c0.chunk.js.map",
+    "static/js/3.e8b0e7f8.chunk.js": "/BlueCarol/static/js/3.e8b0e7f8.chunk.js",
+    "static/js/3.e8b0e7f8.chunk.js.map": "/BlueCarol/static/js/3.e8b0e7f8.chunk.js.map",
+    "index.html": "/BlueCarol/index.html",
+    "static/css/main.7d180cbf.chunk.css.map": "/BlueCarol/static/css/main.7d180cbf.chunk.css.map",
+    "static/js/2.06ccb3c0.chunk.js.LICENSE.txt": "/BlueCarol/static/js/2.06ccb3c0.chunk.js.LICENSE.txt"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.19495ad8.js",
+    "static/js/2.06ccb3c0.chunk.js",
+    "static/css/main.7d180cbf.chunk.css",
+    "static/js/main.48592bd9.chunk.js"
+  ]
+}
